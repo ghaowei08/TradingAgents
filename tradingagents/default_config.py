@@ -1,5 +1,15 @@
 import os
 
+
+def _env(*names: str, default: str | None = None) -> str | None:
+    """Return the first non-empty environment variable from names."""
+    for name in names:
+        value = os.getenv(name)
+        if value:
+            return value
+    return default
+
+
 DEFAULT_CONFIG = {
     "project_dir": os.path.abspath(os.path.join(os.path.dirname(__file__), ".")),
     "results_dir": os.getenv("TRADINGAGENTS_RESULTS_DIR", "./results"),
@@ -8,10 +18,22 @@ DEFAULT_CONFIG = {
         "dataflows/data_cache",
     ),
     # LLM settings
-    "llm_provider": "openai",
-    "deep_think_llm": "gpt-5.4",
-    "quick_think_llm": "gpt-5.4-mini",
-    "backend_url": "https://api.openai.com/v1",
+    "llm_provider": _env("TRADINGAGENTS_LLM_PROVIDER", "LLM_PROVIDER", default="ollama"),
+    "deep_think_llm": _env(
+        "TRADINGAGENTS_DEEP_THINK_LLM",
+        "OLLAMA_DEEP_MODEL",
+        default="qwen3:latest",
+    ),
+    "quick_think_llm": _env(
+        "TRADINGAGENTS_QUICK_THINK_LLM",
+        "OLLAMA_QUICK_MODEL",
+        default="qwen3:latest",
+    ),
+    "backend_url": _env(
+        "TRADINGAGENTS_BACKEND_URL",
+        "OLLAMA_BASE_URL",
+        default="http://localhost:11434/v1",
+    ),
     # Provider-specific thinking configuration
     "google_thinking_level": None,      # "high", "minimal", etc.
     "openai_reasoning_effort": None,    # "medium", "high", "low"
